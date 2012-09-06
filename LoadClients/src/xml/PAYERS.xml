@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CLIENT DELIMITER='|'>
+    <ROW ID='9010'>
+        <SURNAME POS='1'/>
+        <FIRSTNAME POS='2'/>
+        <SECONDNAME POS='3'/>
+    </ROW>
+    <ROW ID='9030'>
+        <RegAdrStr POS='1'/>
+        <RegAdrPlace POS='2'/>
+        <RegAdrZIP POS='3'/>
+        <RegAdrCountry POS='4'/>
+        <RegAdrPhone POS='5'/>
+        <RegAdrObl POS='6'/>
+        <RegAdrRai POS='7'/>
+    </ROW>
+    <ROW ID='9040'>
+        <BirthDate POS='1'/>
+        <BirthPlace POS='2'/>
+    </ROW>
+    <ROW ID='9070'>
+        <WorkPlace POS='1'/>
+        <Job POS='2'/>        
+        <NotUsed POS='3'/>
+        <NotUsed POS='4'/>
+        <NotUsed POS='5'/>
+        <WorkPhone POS='6'/>
+    </ROW>
+    <ROW ID='9110'>
+        <NotUsed POS='1'/>
+        <WorkPhoneCountryCode POS='2'/>
+        <WorkPhoneCode POS='3'/>
+    </ROW>
+    <ROW ID='9140'>
+        <MobilePhone POS='1'/>
+        <HomePhone POS='2'/>
+        <NotUsed POS='3'/>
+        <NotUsed POS='4'/>
+        <MobilePhoneCode POS='5'/>
+        <MobilePhoneCountryCode POS='6'/>
+        <HomePhoneCode POS='7'/>
+        <HomePhoneCountryCode POS='8'/>
+    </ROW>
+    <ROW ID='9150'>
+        <WorkEmail POS='1'/>
+    </ROW>    
+    <ROW ID=''>
+        
+    </ROW>
+</CLIENT>
