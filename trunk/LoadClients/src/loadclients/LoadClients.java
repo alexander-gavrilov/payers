@@ -17,6 +17,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -50,10 +52,16 @@ public class LoadClients {
         CmdLineParser parser = new CmdLineParser();
         CmdLineParser.Option xmlscheme;
         xmlscheme = parser.addStringOption('x', "xmlfile");
+        String xmlfilestr = "";
         CmdLineParser.Option fileIn = parser.addStringOption('i', "input");
+        String fileInStr = "";
         CmdLineParser.Option dataBase = parser.addStringOption('d', "database");
+        String dbStr = "";
         CmdLineParser.Option table = parser.addStringOption('t', "table");
+        String tableStr = "";
         CmdLineParser.Option bCountMax = parser.addIntegerOption('c', "batchcount");
+        int bCMAxInt = 0;
+        long currentdt;
         DOMParser domp = new DOMParser();
         SAXParser saxp = new SAXParser();
         HashMap rowsCol = new HashMap();
@@ -66,12 +74,16 @@ public class LoadClients {
              * разбираем аргументы коммандной строки
              */
             parser.parse(args);
-
+            xmlfilestr = (String) parser.getOptionValue(xmlscheme);
+            fileInStr = (String) parser.getOptionValue(fileIn);
+            dbStr = (String) parser.getOptionValue(dataBase);
+            tableStr = (String) parser.getOptionValue(table);
+            bCMAxInt = (Integer) parser.getOptionValue(bCountMax);
             /**
              * читаем xml-файл описания документа
              */
             InputStream input = new FileInputStream(
-                    new File((String) parser.getOptionValue(xmlscheme)));
+                    new File(xmlfilestr));
             domp.parse(input);
             xmld = domp.getDocument();
             NodeList nodeList = xmld.selectNodes("//ELEMENT");
@@ -86,16 +98,16 @@ public class LoadClients {
             }
 
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite://"+(String) parser.getOptionValue(dataBase));
+            connection = DriverManager.getConnection("jdbc:sqlite://" + dbStr);
             statement = connection.createStatement();
-            //statement.execute("DROP TABLE " + (String) parser.getOptionValue(table));
-            statement.execute("CREATE TABLE " + (String) parser.getOptionValue(table) + " (doc_serial VARCHAR(2),doc_num VARCHAR(7),row_type_id VARCHAR(5),position DECIMAL,NAME VARCHAR(255),VALUE VARCHAR(1000))");
+            //statement.execute("DROP TABLE " + tableStr);
+            //statement.execute("CREATE TABLE " + tableStr + " (doc_serial VARCHAR(2),doc_num VARCHAR(7),row_type_id VARCHAR(5),position DECIMAL,NAME VARCHAR(255),VALUE VARCHAR(1000))");
 
 
             /**
              * читаем csv-файл
              */
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream((String) parser.getOptionValue(fileIn)), "cp866"));
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(fileInStr), "cp866"));
 
             String strLine = "";
 
@@ -106,9 +118,15 @@ public class LoadClients {
             //read comma separated file line by line
             int strNum = 1;
             int batchCount = 0;
-
+            connection.setAutoCommit(false);
+            statement = connection.createStatement();
+            currentdt = System.currentTimeMillis();
+            String insStrSql = "INSERT INTO " + tableStr
+                    + " (doc_serial ,doc_num ,row_type_id ,position ,NAME ,VALUE) VALUES ";
+            String curValStr = "";
+            String valStrSql = "";
             while ((strLine = br.readLine()) != null) {
-
+                curValStr = "";
                 String[] strArr = strLine.split("\\|");
                 //System.out.println("Строка: "+strNum+" размер: "+strArr.length);
 
@@ -121,20 +139,31 @@ public class LoadClients {
                         String val = (String) hashMap.get(key);
                         if (pos + 3 < strArr.length) {
                             //System.out.println(" Результат: " + strArr[1].trim() + strArr[2].trim() + " " + val + " : " + strArr[pos + 3].trim());
-                            String strSql="INSERT INTO " + (String) parser.getOptionValue(table)
-                                    + " (doc_serial ,doc_num ,row_type_id ,position ,NAME ,VALUE) VALUES ('"
-                                    + strArr[1].trim() + "','" + strArr[2].trim() + "','" + strArr[3].trim() + "','" + val + "','" + strArr[pos + 3].trim() + "')";
-                            System.out.println(strSql);
-                            statement.addBatch(strSql);
+                            curValStr += insStrSql+" ('"
+                                    + strArr[1].trim() + "','" + strArr[2].trim() + "','" + strArr[3].trim() + "','" + pos + "','" + val + "','" + strArr[pos + 3].trim() + "')";
+                            //System.out.println(strSql);
+                            //statement.addBatch(strSql);
                             batchCount++;
+                        }
+                        if (batchCount >= (bCMAxInt)) {
+                            System.out.println("Стоимость подготовки: " + (System.currentTimeMillis() - currentdt));
+                            batchCount = 0;
+                            currentdt = System.currentTimeMillis();
+                            System.out.println(curValStr);
+                            statement.executeUpdate(curValStr);
+
+                            System.out.println("Стоимость запроса: " + (System.currentTimeMillis() - currentdt));
+                            statement = connection.createStatement();
+                            currentdt = System.currentTimeMillis();
+
+                            //statement=connection.createStatement();
+                        } else {
+                            curValStr += ";";
                         }
                     }
                 }
-                if (batchCount >= ((Integer) parser.getOptionValue(bCountMax))) {
-                    batchCount = 0;
-                    statement.executeBatch();
-                    //statement=connection.createStatement();
-                }
+
+
                 strNum++;
             }
 
@@ -153,6 +182,8 @@ public class LoadClients {
             System.err.println(e.getMessage());
 
             System.exit(2);
+        } catch (SQLException e) {
+            System.out.println(e);
         } catch (Exception e) {
             System.out.println(e);
         }
