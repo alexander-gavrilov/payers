@@ -120,7 +120,7 @@ public class LoadClients {
                             String key = (String) i.next();
                             int pos = Integer.parseInt(key);
                             String val = (String) hashMap.get(key);
-                            if (pos + 3 < strArr.length && strArr[pos + 3].trim() != "") {
+                            if (pos + 3 < strArr.length && strArr[pos + 3].trim().length()>0) {
                                 pStat.setString(1, strArr[1].trim());
                                 pStat.setString(2, strArr[2].trim());
                                 pStat.setString(3, strArr[3].trim());
