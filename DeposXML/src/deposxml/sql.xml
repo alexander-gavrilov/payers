@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SQL>
+    <SELECT ID='clients'>
+        select p.[doc_serial]||p.[doc_num] as DCODE,
+        UPPER (MAX(case when p.[NAME]='Паспорт.Дата выдачи.' then p.[VALUE] end)) as DDATE,
+        UPPER (MAX(case when p.[NAME]='Паспорт.Орган выдачи.' then p.[VALUE] end)) as DWHOM,
+        UPPER (MAX(case when p.[NAME]='Личный номер.' then p.[VALUE] end)) as DPRIVATE,
+        UPPER (MAX(case when p.[NAME]='Фамилия.' then p.[VALUE] end))||' '
+        ||UPPER (MAX(case when p.[NAME]='Имя.' then p.[VALUE] end))||' '
+        ||UPPER (MAX(case when p.[NAME]='Отчество.' then p.[VALUE] end)) 
+        as NAME,
+        UPPER (MAX(case when p.[NAME]='Дата рождения.' then p.[VALUE] end)) as BIRTHDAY,
+        UPPER(
+        TRIM(
+        coalesce(MAX(case when p.[NAME]='Структурированный адрес регистрации.Индекс.' then p.[VALUE] end),MAX(case when p.[NAME]='Адрес регистрации.Индекс.' then p.[VALUE] end),'')||' '||
+        coalesce(MAX(case when p.[NAME]='Структурированный адрес регистрации.Область.' then p.[VALUE] end),MAX(case when p.[NAME]='Адрес регистрации.Область.' then p.[VALUE] end),'')||' '||
+        coalesce(MAX(case when p.[NAME]='Структурированный адрес регистрации.Район.' then p.[VALUE] end),MAX(case when p.[NAME]='Адрес регистрации.Район.' then p.[VALUE] end),'')||' '||
+        coalesce(MAX(case when p.[NAME]='Структурированный адрес регистрации.Населенный пункт.Наименование.' then p.[VALUE] end),
+        MAX(case when p.[NAME]='Адрес регистрации.Населенный пункт.' then p.[VALUE] end),'')||' '||
+        coalesce(MAX(case when p.[NAME]='Структурированный адрес регистрации.Улица.Наименование.' then p.[VALUE] end)||' '||
+        MAX(case when p.[NAME]='Структурированный адрес регистрации.Дом.' then 'д. '||p.[VALUE] end)||' '||
+        coalesce(MAX(case when p.[NAME]='Структурированный адрес регистрации.Корпус.' then 'кор. '||p.[VALUE] end),'')||' '||
+        coalesce(MAX(case when p.[NAME]='Структурированный адрес регистрации.Квартира.' then 'кв. '||p.[VALUE] end),''),
+        MAX(case when p.[NAME]='Адрес регистрации.Адрес.' then p.[VALUE] end),'')
+        ))as ADDRESS,
+        UPPER(
+        TRIM(
+        coalesce(MAX(case when p.[NAME]='Структурированный адрес проживания.Индекс.' then p.[VALUE] end),MAX(case when p.[NAME]='Адрес проживания.Индекс.' then p.[VALUE] end),'')||' '||
+        coalesce(MAX(case when p.[NAME]='Структурированный адрес проживания.Область.' then p.[VALUE] end),MAX(case when p.[NAME]='Адрес проживания.Область.' then p.[VALUE] end),'')||' '||
+        coalesce(MAX(case when p.[NAME]='Структурированный адрес проживания.Район.' then p.[VALUE] end),MAX(case when p.[NAME]='Адрес проживания.Район.' then p.[VALUE] end),'')||' '||
+        coalesce(MAX(case when p.[NAME]='Структурированный адрес проживания.Населенный пункт.Наименование.' then p.[VALUE] end),
+        MAX(case when p.[NAME]='Адрес проживания.Населенный пункт.' then p.[VALUE] end),'')||' '||
+        coalesce(MAX(case when p.[NAME]='Структурированный адрес проживания.Улица.Наименование.' then p.[VALUE] end)||' '||
+        MAX(case when p.[NAME]='Структурированный адрес проживания.Дом.' then 'д. '||p.[VALUE] end)||' '||
+        coalesce(MAX(case when p.[NAME]='Структурированный адрес проживания.Корпус.' then 'кор. '||p.[VALUE] end),'')||' '||
+        coalesce(MAX(case when p.[NAME]='Структурированный адрес проживания.Квартира.' then 'кв. '||p.[VALUE] end),''),
+        MAX(case when p.[NAME]='Адрес проживания.Адрес.' then p.[VALUE] end),'')
+        ))as ADDRESS2,
+        UPPER (MAX(case when p.[NAME]='Структурированный адрес регистрации.Код страны.' and p.[VALUE]='112' then '1' else '0' end))  as REZIDENT,
+        case when coalesce(MAX(case when p.[NAME]='Структурированный адрес регистрации.Код страны.' then p.[VALUE] end),
+        MAX(case when p.[NAME]='Адрес регистрации.Код страны.' then p.[VALUE] end))='112' 
+        then '1' else '0' end as rez,
+        UPPER (MAX(case when p.[NAME]='Работа.Место работы.' then p.[VALUE] end)) as WORK,
+        coalesce(UPPER(MAX(case when p.[NAME]='Адрес проживания.Телефон.Номер.' then p.[VALUE] end))||' ','')||
+        coalesce( 
+        UPPER (MAX(case when p.[NAME]='Мобильный телефон.Код страны' then '+'||p.[VALUE] end))||
+        UPPER (MAX(case when p.[NAME]='Мобильный телефон.Код сети.' then p.[VALUE] end))||
+        UPPER (MAX(case when p.[NAME]='Мобильный телефон.Номер.' then p.[VALUE] end))||' ','')||
+        coalesce(
+        UPPER (MAX(case when p.[NAME]='Адрес регистрации.Телефон.Код страны.' then '+'||p.[VALUE] end))||
+        UPPER (MAX(case when p.[NAME]='Адрес регистрации.Телефон.Код сети.' then p.[VALUE] end))||
+        UPPER (MAX(case when p.[NAME]='Адрес регистрации.Телефон.Номер.' then p.[VALUE] end)),'')
+        as PHONE,
+        UPPER (coalesce(MAX(case when p.[NAME]='Структурированный адрес регистрации.Код страны.' then p.[VALUE] end),
+        MAX(case when p.[NAME]='Адрес регистрации.Код страны.' then p.[VALUE] end))) as COUNTRY,
+        '01' as DTYPE
+        from [PAYER] p 
+        group by DCODE
+    </SELECT>
+</SQL>
