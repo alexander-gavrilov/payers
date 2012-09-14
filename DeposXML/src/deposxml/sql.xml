@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <SQL>
-    <SELECT ID='clients'>
+    <SELECT id='clients'>
         select p.[doc_serial]||p.[doc_num] as DCODE,
         UPPER (MAX(case when p.[NAME]='Паспорт.Дата выдачи.' then p.[VALUE] end)) as DDATE,
         UPPER (MAX(case when p.[NAME]='Паспорт.Орган выдачи.' then p.[VALUE] end)) as DWHOM,
@@ -54,7 +54,7 @@
         UPPER (coalesce(MAX(case when p.[NAME]='Структурированный адрес регистрации.Код страны.' then p.[VALUE] end),
         MAX(case when p.[NAME]='Адрес регистрации.Код страны.' then p.[VALUE] end))) as COUNTRY,
         '01' as DTYPE
-        from [PAYER] p 
+        from [PAYER] p where p.[doc_serial]='AT'
         group by DCODE
     </SELECT>
 </SQL>

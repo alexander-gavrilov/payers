@@ -13,10 +13,8 @@ import jargs.gnu.CmdLineParser.IllegalOptionValueException;
 import jargs.gnu.CmdLineParser.UnknownOptionException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -27,6 +25,7 @@ import java.util.logging.Logger;
 import oracle.xml.parser.v2.DOMParser;
 import oracle.xml.parser.v2.XMLDocument;
 import oracle.xml.parser.v2.XMLParseException;
+import oracle.xml.parser.v2.XSLException;
 import org.xml.sax.SAXException;
 
 public class DeposXML {
@@ -62,19 +61,26 @@ public class DeposXML {
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite://" + dbStr);
             statement = connection.createStatement();
-            statement.execute("");
+
             input = new FileInputStream(new File(xmlfilestr));
             domp.parse(input);
             xmld = domp.getDocument();
+            
+            String clientsSQL = xmld.valueOf("//SELECT[@id='clients']/text()");
+            
+            
+            resultSet=statement.executeQuery(clientsSQL);
+            String a="a";
 
-
-        } catch (XMLParseException ex) {
+        } catch (XSLException ex) {
+            Logger.getLogger(DeposXML.class.getName()).log(Level.SEVERE, null, ex);
+        }  catch (XMLParseException ex) {
             Logger.getLogger(DeposXML.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SAXException ex) {
             Logger.getLogger(DeposXML.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(DeposXML.class.getName()).log(Level.SEVERE, null, ex);
-        }  catch (SQLException ex) {
+        } catch (SQLException ex) {
             Logger.getLogger(DeposXML.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(DeposXML.class.getName()).log(Level.SEVERE, null, ex);
