@@ -108,19 +108,27 @@ public class LoadClients {
             String strLine = "";
             int strNum = 1;
             int batchCount = 0;
+            int elemCount=0;
+            int elemEscCount=0;
+            int insertElemCount=0;
+            int escapeStr=0;
+            int[] rowsInserted;
             connection.setAutoCommit(false);
             statement = connection.createStatement();
             currentdt = System.currentTimeMillis();
+            int prevRow = 0;
             try {
                 while ((strLine = br.readLine()) != null) {
                     String[] strArr = strLine.split("\\|");
+                    elemCount+=strArr.length;
                     if (strArr.length > 2 && rowsCol.containsKey(strArr[3].trim())) {
                         HashMap hashMap = (HashMap) rowsCol.get(strArr[3].trim());
+                        
                         for (Iterator i = hashMap.keySet().iterator(); i.hasNext();) {
                             String key = (String) i.next();
                             int pos = Integer.parseInt(key);
                             String val = (String) hashMap.get(key);
-                            if (pos + 3 < strArr.length && strArr[pos + 3].trim().length()>0) {
+                            if (pos + 3 < strArr.length && strArr[pos + 3].trim().length() > 0) {
                                 pStat.setString(1, strArr[1].trim());
                                 pStat.setString(2, strArr[2].trim());
                                 pStat.setString(3, strArr[3].trim());
@@ -131,29 +139,42 @@ public class LoadClients {
                                 batchCount++;
                             }
                             if (batchCount >= (bCMAxInt)) {
-                                System.out.println("Стоимость подготовки: " + (System.currentTimeMillis() - currentdt));
+                                //System.out.println("Обработано строк: " + (strNum - prevRow) + " Последняя строка: " + strNum);
+                                prevRow = strNum;
+                                //System.out.println("Время подготовки: " + (System.currentTimeMillis() - currentdt));
                                 batchCount = 0;
                                 currentdt = System.currentTimeMillis();
-                                pStat.executeBatch();
-                                System.out.println("Стоимость запроса: " + (System.currentTimeMillis() - currentdt));
+                                rowsInserted = pStat.executeBatch();
+                                insertElemCount+=rowsInserted.length;
+                                //System.out.println("Время запроса: " + (System.currentTimeMillis() - currentdt));
                                 connection.commit();
                                 pStat.clearBatch();
                                 currentdt = System.currentTimeMillis();
                             }
 
                         }
+                    } else {
+                        escapeStr++;
+                        elemEscCount+=strArr.length;
                     }
                     strNum++;
 
                 }
                 if (batchCount != 0) {
-                    System.out.println("Стоимость подготовки: " + (System.currentTimeMillis() - currentdt));
+                    //System.out.println("Обработано строк: " + (strNum - prevRow) + " Последняя строка: " + strNum);
+                    prevRow = strNum;
+                    //System.out.println("Стоимость подготовки: " + (System.currentTimeMillis() - currentdt));
                     currentdt = System.currentTimeMillis();
-                    pStat.executeBatch();
-                    System.out.println("Стоимость запроса: " + (System.currentTimeMillis() - currentdt));
+                    rowsInserted = pStat.executeBatch();
+                    insertElemCount+=rowsInserted.length;
+                    //System.out.println("Стоимость запроса: " + (System.currentTimeMillis() - currentdt));
                     connection.commit();
                     pStat.clearBatch();
                     currentdt = System.currentTimeMillis();
+                    System.out.println("Всего обработано строк: " + strNum + ", содержащих "+elemCount+" элементов");
+                    System.out.println("Из них:");
+                    System.out.println("        пропущено: " + escapeStr + " строк, содержащих "+elemEscCount+" элементов");
+                    System.out.println("        вставлено в БД: "+insertElemCount+" элементов");
                 }
 
             } catch (SQLException se) {
