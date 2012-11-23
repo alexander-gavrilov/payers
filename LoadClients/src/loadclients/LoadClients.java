@@ -102,7 +102,7 @@ public class LoadClients {
             statement = connection.createStatement();
             //statement.executeUpdate("CREATE OR REPLACE TABLE if exists " + tableStr + ";");
             String crStat="CREATE TABLE " + tableStr + " (id NUMBER,doc_type VARCHAR(10),doc_serial VARCHAR(20),doc_num VARCHAR(20),row_type_id VARCHAR(5),position NUMBER,NAME VARCHAR(255),VALUE VARCHAR(1000),DTCHANGE DATE)";
-            statement.execute(crStat);
+            //statement.execute(crStat);
             ArrayList<String[]> strArArray = new ArrayList<String[]>();
             PreparedStatement pStat = connection.prepareStatement("INSERT INTO " + tableStr
                     + " (id,doc_type,doc_serial ,doc_num ,row_type_id ,position ,NAME ,VALUE,DTCHANGE) VALUES (?,?,?,?,?,?,?,?,TO_DATE(?,'DD/MM/YYYY HH24:MI:SS'))");
