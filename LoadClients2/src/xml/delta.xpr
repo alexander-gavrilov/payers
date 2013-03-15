@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="13.2">
+    <meta>
+        <filters directoryPatterns="" filePatterns="" positiveFilePatterns="" showHiddenFiles="false"/>
+        <options/>
+    </meta>
+    <projectTree name="delta.xpr">
+        <file name="file:/I:/Gavrilov/import/324RKC_VAL.XML"/>
+        <file name="file:/W:/xml/ACCOPER.xml"/>
+        <file name="file:/W:/xml/ACCOUNT.xml"/>
+        <file name="../../../LoadCSV/src/xml/Load.xml"/>
+        <file name="PAYER.xml"/>
+    </projectTree>
+</project>
